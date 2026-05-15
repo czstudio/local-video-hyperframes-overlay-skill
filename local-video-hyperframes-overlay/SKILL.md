@@ -69,6 +69,17 @@ description: Use this skill whenever the user wants to add HyperFrames, HTML, Re
    - 产品名、人名、数字必须按字幕/用户上下文校正；例如 `Sell AI Pro` 不能误写成别的产品名。
    - 字幕 glass bar 要有足够对比：浅色背景上也要读得清，不要为了“透明”牺牲可读性。
 
+10. **生成前先给用户确认字幕、分段、图表点位。**
+   - 默认先产出 `segment-plan.md`，包含清洗字幕摘要、智能分段、每段大字/强调词/补充句、顶部进度条 label、拟加入图表/信息卡的位置和理由。
+   - 用户未确认前，不进入全量渲染；除非用户明确说“直接生成/不用确认”。
+   - 图表只能补充概念或数据关系，不能为了装饰乱加。每个图表必须有时间点、类型、内容、为什么需要。
+
+11. **顶部进度条是内容导航，不是装饰。**
+   - 进度条按智能分段显示，放在顶部安全区，不能压字幕、脸、标题。
+   - 默认风格：细线 glass track + 当前段高亮 + 小 label + 一个跑步小人沿进度移动。
+   - 跑步小人可以用系统 emoji、Noto Emoji SVG、Twemoji SVG 或纯 CSS 图形；必须记录素材来源/许可证。
+   - V1 进度条只表达段落进度，不要再加百分比、复杂节点图、满屏路线。
+
 ## Required Inputs
 
 - `source_video`: 本地视频路径，例如 `01.mp4`
@@ -76,6 +87,7 @@ description: Use this skill whenever the user wants to add HyperFrames, HTML, Re
 - `output_aspects`: 默认同时出 `16:9` 和 `9:16`
 - `caption_source`: 已有 SRT 或转写生成的 SRT
 - `visual_goal`: 例如“高质量 YouTube 科技/AI 教学视频开场”
+- `expected_terms`: 必须校正的产品名、人名、专有词，例如 `Sell AI Pro`
 
 ## SOP
 
@@ -149,6 +161,17 @@ Before rendering, run a text-density pass:
 - remove chips/stat/callout unless each adds new information
 - keep the reference-image hierarchy: big words first, small explanation second
 - if a frame reads like a dashboard, reduce text layers before changing colors
+
+Create `segment-plan.md` and ask for confirmation unless the user explicitly opted out. See `references/progress-segmentation.md`.
+
+The plan must include:
+
+- cleaned subtitle text or a compact subtitle summary
+- 5-8 semantic segments from the transcript
+- per-segment: timestamp range, display label, headline, accent, support sentence
+- progress-bar labels and active ranges
+- chart/info-card insertions with timestamp, chart type, and why it clarifies the content
+- terms corrected from the transcript
 
 ### 4. Design the horizontal layout
 
@@ -286,6 +309,8 @@ Minimum required checks:
 - Confirm no black overlay covers the video.
 - Confirm subtitle does not cover face/mouth.
 - Confirm text-density check passed: no duplicated screen text, no unnecessary chips/stat/cards, product names corrected.
+- Confirm top progress bar follows semantic segments and the running marker does not overlap title/face.
+- Confirm planned chart/info-card points match `segment-plan.md`.
 - If Kimi or another model is available, run a read-only review against the contact sheets. Treat a FAIL as a blocker and revise before reporting done.
 
 ## Output Report
@@ -308,6 +333,8 @@ Report in this structure:
 - centered-person check passed
 - reference-style check passed
 - text-density check passed
+- semantic progress bar check passed
+- chart/info-card plan followed
 - optional Kimi/other-agent read-only review result
 
 本次用到的 skill：

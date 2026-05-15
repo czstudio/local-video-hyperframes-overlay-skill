@@ -11,6 +11,7 @@ Use this when the user provides a reference image similar to a YouTube/AI teachi
 - Small top-left label and thin line, like a light HUD marker.
 - Bottom translucent subtitle bar that still shows the video through it.
 - One short support line. Tags, callouts, info cards, or charts are off by default and only allowed when they add new information.
+- Optional top progress bar: thin glass track, semantic segment labels, current segment highlight, and a small running marker. It should feel like a quiet navigator, not app chrome.
 - Warm original video tone plus clean AI/tech HUD. It should feel like a high-quality YouTube tech/AI teaching opener.
 - Strong opening: the most clickable idea appears in the first 0-8 seconds.
 - Natural transitions: soft fade, glass wipe, subtle push, or a single person-position switch at a sentence boundary.
@@ -24,6 +25,8 @@ Use this when the user provides a reference image similar to a YouTube/AI teachi
 - Do not repeat the same idea in headline, accent, chips, metrics, callout, and subtitle.
 - Do not leave wrong product names or obvious transcript mistakes on screen.
 - Do not use noisy particle effects.
+- Do not let the top progress bar compete with the hook text or cover the face.
+- Do not add charts before confirming the subtitle-driven segment plan.
 - Do not create a standalone animation that replaces the user's video.
 - Do not turn the composition into a dark dashboard if the reference is a warm video frame with light translucent overlays.
 - Do not use tiny text, opaque black boxes, heavy borders, or generic SaaS UI cards as the primary look.
@@ -59,6 +62,7 @@ A frame passes only if it reads as:
 - clean modern tech/AI opener
 - sparse screen text: small label + large title + highlighted phrase + one support line
 - no repeated wording across headline/accent/support/subtitle
+- optional top progress bar that is subtle, semantic, and clean
 
 If the frame reads as a generic dark dashboard, a template intro, or a standalone motion graphic, it fails.
 

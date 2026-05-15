@@ -101,6 +101,34 @@ Pass only when each beat shows:
 - one support sentence
 - bottom subtitle bar
 
+## Segment Plan Gate
+
+Before a long render, confirm `segment-plan.md` exists unless the user explicitly asked to render without confirmation.
+
+Fail if any are true:
+
+- cleaned subtitle text was not reviewed before writing screen text
+- semantic segments are equal time slices instead of content-based sections
+- progress labels are generic or unrelated to the transcript
+- chart/info-card points have no timestamp, type, content, and reason
+- chart/info-card content repeats the headline or subtitle
+
+Pass only when the user has a clear table showing subtitle corrections, 5-8 semantic segments, top progress bar labels, and every planned chart/info-card insertion.
+
+## Progress Bar Gate
+
+Sample the opening frame and each segment transition.
+
+Fail if any are true:
+
+- top progress bar covers the speaker's face, hook title, or subtitles
+- running marker is too large, too bright, or distracting
+- progress track looks like a generic app dashboard instead of a light video overlay
+- segment labels are too dense to read
+- asset source/license for the runner marker is missing from `report.md`
+
+Pass only when the progress bar reads as a clean content navigator with a subtle running marker.
+
 ## Visual Gates
 
 Fail if any are true:
@@ -110,6 +138,7 @@ Fail if any are true:
 - face/head is cropped or stuck to the panel edge when a better crop/scale is possible
 - reference style is missing: no large semi-transparent hook text, no glass subtitle, no premium tech HUD
 - screen text is not compressed to the core message plus one support line
+- progress bar or chart plan was skipped when confirmation was required
 - the video is frozen across multiple timestamps
 - subtitle bar covers the speaker's mouth
 - headline/card covers the face

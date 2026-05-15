@@ -15,7 +15,8 @@ Skill name: local-video-hyperframes-overlay
 2. 确认最终路径里存在：
    ~/.agents/skills/local-video-hyperframes-overlay/SKILL.md
 3. 以后凡是我说“给本地视频叠 HyperFrames/科技感字幕/YouTube AI 教学开场动效”，都必须先使用这个 skill。
-4. 安装后请回复：
+4. 长视频生成前，必须先给我确认 `segment-plan.md`：字幕校正文案、智能分段、顶部进度条 label、图表/信息卡点位和理由。
+5. 安装后请回复：
    已安装 local-video-hyperframes-overlay，并说明 SKILL.md 的绝对路径。
 
 不要只阅读 GitHub 页面；必须真正复制 skill 文件到本地 skills 目录。

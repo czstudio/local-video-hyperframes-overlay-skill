@@ -10,6 +10,8 @@
 - 输出比例：`{{ASPECTS}}`
 - 风格目标：`{{STYLE_GOAL}}`
 - 必须校正的词：`{{EXPECTED_TERMS}}`
+- 是否需要先确认字幕/分段：`{{CONFIRM_SEGMENTS}}`
+- 顶部进度条风格：`{{PROGRESS_STYLE}}`
 
 ## 绝对要求
 
@@ -28,10 +30,14 @@
 12. 屏幕文字必须精简：每个 beat 默认只保留一个小 label、一个大标题、一个薄荷/青色强调词、一句补充；不要同时堆 chips/stat/callout/chart。
 13. 产品名、人名、数字必须校正；不要把 `{{EXPECTED_TERMS}}` 写错。发现字幕误识别时只修明显错词，不大改时间轴。
 14. 如果你做完后自查或另一个 agent 复核为 FAIL，必须继续修，不要报告完成。
+15. 默认先输出 `segment-plan.md`，让用户确认字幕文案、智能分段、进度条 label、图表/信息卡点位后再渲染；除非 `{{CONFIRM_SEGMENTS}}` 明确写“否/直接生成”。
+16. 视频顶部要有语义进度条：按文案分段显示，当前段高亮，一个跑步小人沿轨道移动；不能遮脸、遮标题或遮字幕。
+17. 图表/信息卡必须少而准：每个都写清时间点、类型、内容、为什么需要；没有补充价值就不要加。
 
 ## 交付物
 
 - `captions.cleaned.srt`
+- `segment-plan.md`
 - `overlay.html` 或等价 HTML
 - `final-16x9.mp4`
 - `final-9x16.mp4`
