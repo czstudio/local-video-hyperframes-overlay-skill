@@ -6,6 +6,7 @@ Use this when the user provides a reference image similar to a YouTube/AI teachi
 
 - One talking-head video frame only.
 - Centered person inside the talking-head frame.
+- Natural person geometry: no stretched face, no squeezed frame, no giant forced close-up.
 - Large concise headline or key number on the open side of the frame.
 - Semi-transparent premium typography: white at slightly reduced opacity, mint/green or cyan highlight, subtle shadow, thin underline.
 - Small top-left label and thin line, like a light HUD marker.
@@ -20,6 +21,8 @@ Use this when the user provides a reference image similar to a YouTube/AI teachi
 
 - Do not duplicate the person as a blurred background.
 - Do not crop the person so the face is stuck to the edge.
+- Do not output 9:16 or force a horizontal video into a tall crop.
+- Do not distort the person to fill the canvas.
 - Do not cover the face with metrics.
 - Do not fill the whole screen with cards.
 - Do not repeat the same idea in headline, accent, chips, metrics, callout, and subtitle.
@@ -31,13 +34,14 @@ Use this when the user provides a reference image similar to a YouTube/AI teachi
 - Do not turn the composition into a dark dashboard if the reference is a warm video frame with light translucent overlays.
 - Do not use tiny text, opaque black boxes, heavy borders, or generic SaaS UI cards as the primary look.
 
-## Horizontal Layout From Vertical Source
+## Horizontal Layout From Tall/Narrow Source
 
 Recommended layout:
 
 - Canvas: `1280x720` or `1920x1080`.
 - Single video panel: right side or center-right.
 - Person must be centered within that panel; adjust crop/scale from face center.
+- Preserve source aspect ratio; use padding, warm fill, or non-person background instead of zooming into the face.
 - Left side: title and one highlighted phrase. Metrics/chips are off by default.
 - Background: dark/warm abstract color, subtle grid, or non-person surface.
 - Subtitle: bottom center, glass bar.
@@ -47,6 +51,7 @@ If the source video is already horizontal:
 - Keep full original frame.
 - Place text in empty negative space.
 - Do not crop face or important objects.
+- Do not create a 9:16 derivative.
 - If you crop into a panel, compute the crop from face center instead of taking the left/right half by default.
 - Prefer a translucent wash over the original environment instead of replacing half the frame with an opaque panel.
 
@@ -55,6 +60,7 @@ If the source video is already horizontal:
 A frame passes only if it reads as:
 
 - one clear talking-head video
+- natural, undistorted person geometry
 - large semi-transparent hook text
 - mint/cyan highlight or key number
 - bottom glass subtitle

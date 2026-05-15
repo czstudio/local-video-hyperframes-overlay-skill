@@ -73,7 +73,7 @@ V1 limit:
 
 Default visual style:
 
-- Top safe area, usually `24-42px` from the top in 16:9 and `32-56px` in 9:16.
+- Top safe area, usually `24-42px` from the top in 16:9.
 - Thin glass track with 1px translucent border and soft blur.
 - Active segment in mint/cyan.
 - Segment labels small and sparse; show all labels only if they fit cleanly.

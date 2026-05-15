@@ -18,6 +18,7 @@ Expected:
 - fps matches requested fps
 - duration matches source within one frame
 - dimensions match target aspect
+- target aspect must be 16:9; fail any 9:16 / 720x1280 output
 - expected brand/product terms are corrected in captions and overlay text
 
 Frame count:
@@ -55,12 +56,26 @@ For every sampled frame:
 - both sides of the head should have breathing room unless the source video itself lacks those pixels
 - the face must not touch the left/right panel edge
 - the crop must not show only half a face when a better crop/scale is possible
+- the person must not be stretched, squeezed, or non-uniformly scaled
+- the face/head must not be over-zoomed into a giant close-up unless the source itself is already that close
+- if the source includes shoulders or chest, the final should preserve enough shoulder/neck context to feel natural
 
 If the source is horizontal but the final layout uses a narrower person panel, inspect the sampled source frames and compute crop from the face center:
 
 ```text
 crop_x = clamp(face_center_x - crop_w / 2, 0, source_w - crop_w)
 ```
+
+## 16:9 Only Gate
+
+Fail if any are true:
+
+- final deliverable is 9:16, 720x1280, or named `final-9x16.mp4`
+- the workspace creates `.overlay-9x16`, `cs-9x16-*.jpg`, or `qa/contact-9x16.png` as claimed output
+- a horizontal source was forced through a tall-frame crop such as `scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280`
+- the contact sheet shows a giant face close-up caused by format conversion
+
+Pass only when the final deliverable is 16:9 and the person looks like the original source, not a distorted crop.
 
 ## Reference Style Gate
 
@@ -134,8 +149,10 @@ Pass only when the progress bar reads as a clean content navigator with a subtle
 Fail if any are true:
 
 - horizontal frame shows two people or a blurred duplicate person
+- final output is 9:16 or any non-16:9 aspect
 - person is not centered inside the person panel
 - face/head is cropped or stuck to the panel edge when a better crop/scale is possible
+- person is stretched, squeezed, over-zoomed, or visually distorted
 - reference style is missing: no large semi-transparent hook text, no glass subtitle, no premium tech HUD
 - screen text is not compressed to the core message plus one support line
 - progress bar or chart plan was skipped when confirmation was required

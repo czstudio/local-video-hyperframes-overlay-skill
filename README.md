@@ -7,6 +7,8 @@
 - 原视频主体必须清晰，不能被独立动画替代。
 - 人物画面只能出现一次，不能用同一个人物视频做模糊背景。
 - 人像必须在人物画面内居中。
+- 只输出 `16:9` 横屏，不再生成 `9:16` 或竖屏版本。
+- 人物画面不能失真：禁止非等比拉伸、强裁大头、头发/脸侧/下巴贴边。
 - 屏幕文字必须精简，参考 YouTube 科技/AI 教学开场：大字、半透明高级感、底部 glass 字幕条、少量 HUD。
 - 长渲染前先产出 `segment-plan.md`，让用户确认字幕文案、智能分段、顶部进度条 label、图表/信息卡点位和理由。
 - 顶部进度条按文案语义分段显示，使用细 glass track、当前段高亮和跑步小人 marker。
@@ -38,7 +40,8 @@ Skill name: local-video-hyperframes-overlay
 2. 确认最终路径里存在 ~/.agents/skills/local-video-hyperframes-overlay/SKILL.md。
 3. 以后凡是我说“给本地视频叠 HyperFrames/科技感字幕/YouTube AI 教学开场动效”，都必须先使用这个 skill。
 4. 长视频生成前，必须先给我确认 segment-plan.md：字幕校正文案、智能分段、顶部进度条 label、图表/信息卡点位和理由。
-5. 安装后请回复：已安装 local-video-hyperframes-overlay，并说明 SKILL.md 的绝对路径。
+5. 这个 skill 只能输出 16:9 横屏；禁止生成 9:16/竖屏版本，禁止把人物画面强裁、拉伸或放大到失真。
+6. 安装后请回复：已安装 local-video-hyperframes-overlay，并说明 SKILL.md 的绝对路径。
 
 不要只阅读 GitHub 页面；必须真正复制 skill 文件到本地 skills 目录。
 ```

@@ -1,6 +1,6 @@
 ---
 name: local-video-hyperframes-overlay
-description: Use this skill whenever the user wants to add HyperFrames, HTML, Remotion, or motion-graphics effects onto an existing local talking-head video, especially for AI/tech/YouTube-style openings, subtitle-driven overlays, SRT timing, horizontal or vertical exports, or when the user says the original video must remain clear. This skill prevents the common failure where the model creates a standalone animation, freezes a frame, duplicates the person, or uses a blurred copy of the same person as the background.
+description: Use this skill whenever the user wants to add HyperFrames, HTML, Remotion, or motion-graphics effects onto an existing local talking-head video, especially for AI/tech/YouTube-style openings, subtitle-driven overlays, SRT timing, and 16:9 horizontal exports where the original video must remain clear. This skill prevents the common failure where the model creates a standalone animation, freezes a frame, duplicates the person, distorts the person, over-crops the face, outputs 9:16, or uses a blurred copy of the same person as the background.
 ---
 
 # Local Video HyperFrames Overlay SOP
@@ -80,11 +80,24 @@ description: Use this skill whenever the user wants to add HyperFrames, HTML, Re
    - 跑步小人可以用系统 emoji、Noto Emoji SVG、Twemoji SVG 或纯 CSS 图形；必须记录素材来源/许可证。
    - V1 进度条只表达段落进度，不要再加百分比、复杂节点图、满屏路线。
 
+12. **只输出 16:9 横屏。**
+   - 本 skill 不再生成 9:16、720x1280、竖屏 contact sheet 或竖屏 overlay。
+   - 即使目标平台是短视频，也只交付 16:9 横屏版本；不要自作主张补竖屏。
+   - 如果用户再次要求竖屏，先停下来说明这个 skill 已禁用竖屏，不要直接渲染。
+   - 输出文件统一命名为 `final-16x9.mp4` 或清晰的横屏文件名。
+
+13. **人物画面不能失真、不能过度放大。**
+   - 必须保持源视频宽高比例；禁止非等比拉伸，禁止把人脸强行拉长或压扁。
+   - 横屏源不要用 `scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280` 这类竖屏裁切链。
+   - 如果源素材不是 16:9，优先等比缩放 + 留白/背景承接；不要为了填满画布把脸裁到贴边。
+   - 说话人头发、脸侧、下巴、肩颈要有呼吸空间；若源画面本来包含肩颈，成片不能只剩大头特写。
+   - contact sheet 里出现脸被过度放大、头发/脸侧/下巴贴边、肩颈被无故裁掉，即失败。
+
 ## Required Inputs
 
 - `source_video`: 本地视频路径，例如 `01.mp4`
 - `reference_image`: 用户给的风格参考图，可选但强烈建议看
-- `output_aspects`: 默认同时出 `16:9` 和 `9:16`
+- `output_aspects`: 固定只出 `16:9`
 - `caption_source`: 已有 SRT 或转写生成的 SRT
 - `visual_goal`: 例如“高质量 YouTube 科技/AI 教学视频开场”
 - `expected_terms`: 必须校正的产品名、人名、专有词，例如 `Sell AI Pro`
@@ -192,11 +205,12 @@ Before choosing a crop:
 - choose crop/scale so the face center lands in the middle third of the person panel
 - reject crops where the face touches the panel edge
 
-For vertical source video exported to horizontal:
+For tall or narrow source video exported to 16:9:
 
 - place the single sharp video panel center-right or right
 - do not duplicate video as full-screen blurred background
 - fill unused space with dark/warm abstract background, not another copy of the person
+- preserve aspect ratio and keep head/shoulders natural; pad/fill around the video instead of zooming into a giant face
 
 For horizontal source video:
 
@@ -205,16 +219,13 @@ For horizontal source video:
 - put large text in the real negative space, or use a light translucent wash over the video
 - avoid turning the whole left half into an opaque dark dashboard unless the reference asks for that
 
-### 5. Design the vertical layout
+### 5. Reject non-horizontal deliverables
 
-For `9:16`, keep the original video full-frame or near full-frame:
+Do not design, render, export, or report a 9:16 deliverable. This skill is now 16:9 only.
 
-- top: large headline only when needed
-- middle: avoid face
-- lower third: only one short support element if needed
-- bottom: subtitle bar
+If an existing workspace contains `.overlay-9x16`, `final-9x16.mp4`, `cs-9x16-*.jpg`, or `qa/contact-9x16.png`, ignore them and do not treat them as valid output.
 
-The vertical version still needs the same reference feel: large translucent hook text, glass subtitle bar, sparse HUD, centered person.
+If a previous run produced a 9:16 file, mark it as rejected because it risks face over-cropping and visual distortion.
 
 ### 6. Render transparent overlay frames
 
@@ -251,7 +262,7 @@ Expected: `pix_fmt=rgba`.
 
 ### 7. Compose final video with ffmpeg
 
-Horizontal example for a vertical talking-head source:
+Horizontal example for a tall/narrow talking-head source:
 
 ```bash
 ffmpeg -y \
@@ -263,20 +274,6 @@ ffmpeg -y \
   -c:v libx264 -pix_fmt yuv420p \
   -c:a aac -b:a 160k -movflags +faststart \
   final-16x9.mp4
-```
-
-Vertical example:
-
-```bash
-ffmpeg -y \
-  -i source.mp4 \
-  -framerate 30 -i .overlay-9x16/frame-%06d.png \
-  -filter_complex "[0:v]scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280[base];[base][1:v]overlay=0:0:format=auto[v]" \
-  -map "[v]" -map 0:a \
-  -t 156.967 \
-  -c:v libx264 -pix_fmt yuv420p \
-  -c:a aac -b:a 160k -movflags +faststart \
-  final-9x16.mp4
 ```
 
 If the source is horizontal and you are cropping it into a narrower person panel, never hard-code `crop=half_width:height:0:0` or `crop=half_width:height:half_width:0`. Compute the crop from the face center:
@@ -293,6 +290,8 @@ Example for a `1280x720` source placed into a `640x720` person panel when the fa
 
 Do not use a blurred duplicate of `[0:v]` as background in horizontal unless the source does not contain a person.
 
+Never render `final-9x16.mp4`; never create `.overlay-9x16`.
+
 ### 8. Verify before reporting done
 
 Use the checklist in `references/qa-checklist.md`.
@@ -305,6 +304,7 @@ Minimum required checks:
 - Confirm sampled frames show different mouth/head positions.
 - Confirm horizontal has exactly one visible person.
 - Confirm the person is centered inside the person panel.
+- Confirm the person is not distorted, stretched, squeezed, or over-zoomed.
 - Confirm the visual style matches the reference: large semi-transparent hook text, glass subtitle bar, sparse HUD, premium YouTube tech opener feel.
 - Confirm no black overlay covers the video.
 - Confirm subtitle does not cover face/mouth.
@@ -320,7 +320,6 @@ Report in this structure:
 ```markdown
 完成：
 - 16:9: [path]
-- 9:16: [path]
 
 做了哪些效果：
 - ...
@@ -331,6 +330,7 @@ Report in this structure:
 - alpha overlay verified
 - horizontal one-person check passed
 - centered-person check passed
+- no person distortion / no over-crop check passed
 - reference-style check passed
 - text-density check passed
 - semantic progress bar check passed
