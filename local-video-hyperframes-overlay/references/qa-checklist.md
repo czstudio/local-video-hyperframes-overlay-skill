@@ -1,0 +1,120 @@
+# QA Checklist
+
+Run this before saying the video is done.
+
+## Technical
+
+```bash
+ffprobe -hide_banner -v error \
+  -show_entries format=duration \
+  -show_entries stream=index,codec_type,codec_name,width,height,avg_frame_rate,duration \
+  -of json final.mp4
+```
+
+Expected:
+
+- video stream exists
+- audio stream exists unless user asked for silent
+- fps matches requested fps
+- duration matches source within one frame
+- dimensions match target aspect
+- expected brand/product terms are corrected in captions and overlay text
+
+Frame count:
+
+```bash
+ffprobe -v error -count_frames -select_streams v:0 \
+  -show_entries stream=nb_read_frames \
+  -of default=nk=1:nw=1 final.mp4
+```
+
+## Contact Sheet
+
+Create sampled frames:
+
+```bash
+mkdir -p qa
+for sec in 0 6 24 55 96 139; do
+  ffmpeg -hide_banner -loglevel error -ss "$sec" -i final.mp4 -frames:v 1 "qa/$sec.png" -y
+done
+```
+
+Then make a contact sheet with the helper script:
+
+```bash
+bash scripts/make-contact-sheet.sh qa contact.png
+```
+
+For short videos, sample timestamps that fit the actual duration, for example `0, 6, 12, 20, 30, 39`. Do not use timestamps past the end of the file.
+
+## Centered Person Gate
+
+For every sampled frame:
+
+- the visible face/head should sit in the middle third of the person panel
+- both sides of the head should have breathing room unless the source video itself lacks those pixels
+- the face must not touch the left/right panel edge
+- the crop must not show only half a face when a better crop/scale is possible
+
+If the source is horizontal but the final layout uses a narrower person panel, inspect the sampled source frames and compute crop from the face center:
+
+```text
+crop_x = clamp(face_center_x - crop_w / 2, 0, source_w - crop_w)
+```
+
+## Reference Style Gate
+
+Sample the opening frame and each beat change. Fail if the frame does not resemble the user's reference image.
+
+Required visual signals:
+
+- large hook text or key number appears in the first 0-8 seconds
+- text feels semi-transparent and premium, not flat default UI text
+- mint/green or cyan highlight is used for the key number/phrase
+- bottom subtitle is in a translucent glass bar, not a solid black slab
+- HUD is sparse: thin line, small label, light chips/callout, at most one chart/info card cluster
+- original video remains the visual base and stays clear
+- overall tone is high-quality YouTube tech/AI teaching opener
+
+Fail if any are true:
+
+- looks like a generic dark dashboard instead of an overlay on the real video
+- primary text is too small to be a hook
+- overlay is too opaque and hides the original video environment
+- effects are too busy: particle rain, full-screen neon, too many cards, or cheap template motion
+- the strongest information is not front-loaded
+
+## Text-Density Gate
+
+Fail if any are true:
+
+- the same key phrase appears in headline, accent, chip, stat, callout, and subtitle at once
+- the frame has more than one chip/stat/callout cluster in V1
+- product names are guessed or wrong
+- the frame looks like a UI dashboard rather than a video with a few premium overlays
+
+Pass only when each beat shows:
+
+- one small label
+- one large headline
+- one highlighted phrase/number
+- one support sentence
+- bottom subtitle bar
+
+## Visual Gates
+
+Fail if any are true:
+
+- horizontal frame shows two people or a blurred duplicate person
+- person is not centered inside the person panel
+- face/head is cropped or stuck to the panel edge when a better crop/scale is possible
+- reference style is missing: no large semi-transparent hook text, no glass subtitle, no premium tech HUD
+- screen text is not compressed to the core message plus one support line
+- the video is frozen across multiple timestamps
+- subtitle bar covers the speaker's mouth
+- headline/card covers the face
+- overlay accidentally has black background
+- output is a standalone animation rather than the user's video
+- user reference style is ignored
+
+Pass only when sampled frames show the original video is moving, effects are a transparent overlay, the person is centered, and the reference style is visibly matched.
