@@ -1,6 +1,6 @@
 ---
 name: local-video-hyperframes-overlay
-description: Use this skill whenever the user wants to add HyperFrames, HTML, Remotion, or motion-graphics effects onto an existing local talking-head video, especially for AI/tech/YouTube-style openings, subtitle-driven overlays, SRT timing, and 16:9 horizontal exports where the original video must remain clear. This skill prevents the common failure where the model creates a standalone animation, freezes a frame, duplicates the person, distorts the person, over-crops the face, outputs 9:16, or uses a blurred copy of the same person as the background.
+description: Use this skill whenever the user wants to add HyperFrames, HTML, Remotion, or motion-graphics effects onto an existing local talking-head video, especially for AI/tech/YouTube-style openings, subtitle-driven overlays, SRT timing, Feishu/OpenClaw/Codex bridge video requests, and 16:9 horizontal exports where the original video must remain clear. This skill prevents the common failure where the model creates a standalone animation, freezes a frame, duplicates the person, distorts the person, over-crops the face, outputs 9:16, fails to return the edited video through Feishu, or uses a blurred copy of the same person as the background.
 ---
 
 # Local Video HyperFrames Overlay SOP
@@ -94,6 +94,13 @@ description: Use this skill whenever the user wants to add HyperFrames, HTML, Re
    - 说话人头发、脸侧、下巴、肩颈要有呼吸空间；若源画面本来包含肩颈，成片不能只剩大头特写。
    - contact sheet 里出现脸被过度放大、头发/脸侧/下巴贴边、肩颈被无故裁掉，即失败。
 
+14. **剪好后默认通过飞书回传。**
+   - 每次 `final-16x9.mp4` 通过 QA 后，必须按 `references/delivery.md` 把成片发回用户的飞书会话或来源 bridge 会话。
+   - 如果视频来自 OpenClaw、Codex bridge、Feishu 群/私聊入站附件，默认直接下载/读取附件、运行本 skill、再回复同一个会话；不要让用户重复提供本地路径。
+   - 发送成功只认真实 `message_id` 或 OpenClaw/Feishu 返回的等价消息 ID；不能把命令退出码、文件存在、本地渲染完成当成已发送。
+   - 如果飞书发送失败，最终报告必须写 `delivery: blocked`、失败命令、错误摘要和本地成片绝对路径；不能说“已发”。
+   - 发送前必须再次核对 artifact freshness：发送当前 run 的 `final-16x9.mp4`，禁止误发旧 V1、`final-9x16.mp4`、`cs-9x16-*.jpg` 或未通过 QA 的文件。
+
 ## Required Inputs
 
 - `source_video`: 本地视频路径，例如 `01.mp4`
@@ -103,6 +110,7 @@ description: Use this skill whenever the user wants to add HyperFrames, HTML, Re
 - `visual_goal`: 例如“高质量 YouTube 科技/AI 教学视频开场”
 - `expected_terms`: 必须校正的产品名、人名、专有词，例如 `Sell AI Pro`
 - `transcription_model`: 默认 `Systran/faster-whisper-small`，见 `references/transcription.md`
+- `delivery_target`: 飞书 `chat_id`、`user_id`、OpenClaw source context，或 bridge 原始会话；见 `references/delivery.md`
 
 ## SOP
 
@@ -324,7 +332,20 @@ Minimum required checks:
 - Confirm text-density check passed: no duplicated screen text, no unnecessary chips/stat/cards, product names corrected.
 - Confirm top progress bar follows semantic segments and the running marker does not overlap title/face.
 - Confirm planned chart/info-card points match `segment-plan.md`.
+- Confirm delivery target is resolved from the current Feishu/OpenClaw/Codex bridge context or configured user target.
 - If Kimi or another model is available, run a read-only review against the contact sheets. Treat a FAIL as a blocker and revise before reporting done.
+
+### 9. Deliver through Feishu / bridge
+
+After QA passes, deliver the edited video using `references/delivery.md`.
+
+Default delivery behavior:
+
+- If invoked from Feishu / OpenClaw / Codex bridge with a source message context, reply to that same context with `final-16x9.mp4`.
+- If invoked locally without a source message context, use the configured Feishu target if one exists; otherwise ask once for the target and report `delivery: blocked` for this run.
+- Include a short text summary and, when useful, the contact sheet path or image.
+- Record the returned `message_id` in `report.md`.
+- Do not report completion as fully done until delivery has either succeeded with `message_id` or is explicitly marked blocked with the reason.
 
 ## Output Report
 
@@ -333,6 +354,7 @@ Report in this structure:
 ```markdown
 完成：
 - 16:9: [path]
+- 飞书发送: [message_id or blocked reason]
 
 做了哪些效果：
 - ...
@@ -348,6 +370,7 @@ Report in this structure:
 - text-density check passed
 - semantic progress bar check passed
 - chart/info-card plan followed
+- Feishu/OpenClaw delivery message_id or blocked reason
 - optional Kimi/other-agent read-only review result
 
 本次用到的 skill：
@@ -358,6 +381,7 @@ Report in this structure:
 
 If the executor is Kimi or another model, paste this whole `SKILL.md` plus `templates/kimi-task-prompt.md`.
 Also paste `references/transcription.md` when the video has no reliable SRT, so the model knows exactly how to download and use the speech-to-text model.
+Also paste `references/delivery.md` when the video should be returned through Feishu, OpenClaw, or Codex bridge.
 
 Tell the model:
 

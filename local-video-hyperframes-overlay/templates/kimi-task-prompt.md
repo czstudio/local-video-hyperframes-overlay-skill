@@ -13,6 +13,7 @@
 - 是否需要先确认字幕/分段：`{{CONFIRM_SEGMENTS}}`
 - 顶部进度条风格：`{{PROGRESS_STYLE}}`
 - 字幕转写模型：默认 `Systran/faster-whisper-small`，按 `references/transcription.md` 下载和使用
+- 飞书/Bridge 回传目标：`{{DELIVERY_TARGET}}`
 
 ## 绝对要求
 
@@ -37,6 +38,8 @@
 16. 视频顶部要有语义进度条：按文案分段显示，当前段高亮，一个跑步小人沿轨道移动；不能遮脸、遮标题或遮字幕。
 17. 图表/信息卡必须少而准：每个都写清时间点、类型、内容、为什么需要；没有补充价值就不要加。
 18. 如果 `OPENAI_API_KEY` 缺失或 `openai-whisper` 模型 checksum 失败，不要反复重试，也不要伪造字幕；改用 faster-whisper 工作流，仍失败就报告 blocker。
+19. 成片 QA 通过后，必须按 `references/delivery.md` 通过飞书/OpenClaw/Codex bridge 回传 `final-16x9.mp4`；成功只认真实 `message_id`。发送失败要写 blocked 和本地成片路径，不能说已发送。
+20. 如果源视频来自 OpenClaw 或 Codex bridge 入站附件，直接把该附件当 `source_video` 跑本 skill，并回复同一个会话；不要让用户重复上传。
 
 ## 交付物
 
@@ -49,12 +52,14 @@
 - `final-16x9.mp4`
 - `qa/contact-16x9.png`
 - `report.md`
+- `qa/delivery-openclaw.json` 或 `qa/delivery-lark.json`，如果已发送
 
 ## 完成报告格式
 
 ```markdown
 完成：
 - 16:9: ...
+- 飞书发送: message_id 或 blocked
 
 效果：
 - ...

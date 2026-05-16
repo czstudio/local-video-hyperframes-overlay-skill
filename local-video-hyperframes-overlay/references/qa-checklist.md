@@ -130,6 +130,35 @@ Fail if any are true:
 
 Pass only when the user has a clear table showing subtitle corrections, 5-8 semantic segments, top progress bar labels, and every planned chart/info-card insertion.
 
+## Delivery Gate
+
+Run this after render QA passes.
+
+Pass only when one of these is true:
+
+- `final-16x9.mp4` was sent back through Feishu / OpenClaw / Codex bridge and a real `message_id` was recorded in `report.md`
+- delivery is explicitly marked `blocked` in `report.md` with the reason, failed command/error, and local `final-16x9.mp4` path
+
+Fail if any are true:
+
+- the report says the video was sent but has no `message_id`
+- only a local file path was produced when a Feishu/OpenClaw source context was available
+- the sent file path is an old artifact, a 9:16 output, a contact sheet, or not from the current work directory
+- the original request came through OpenClaw/Codex bridge with an attached video, but the agent asked the user to upload the same video again instead of processing the inbound media
+
+Before sending, check artifact freshness:
+
+```bash
+test -f final-16x9.mp4
+test -f qa/contact-16x9.png
+ffprobe -hide_banner -v error \
+  -show_entries format=duration \
+  -show_entries stream=index,codec_type,width,height,avg_frame_rate \
+  -of json final-16x9.mp4
+```
+
+See `references/delivery.md`.
+
 ## Progress Bar Gate
 
 Sample the opening frame and each segment transition.
@@ -156,6 +185,7 @@ Fail if any are true:
 - reference style is missing: no large semi-transparent hook text, no glass subtitle, no premium tech HUD
 - screen text is not compressed to the core message plus one support line
 - progress bar or chart plan was skipped when confirmation was required
+- Feishu/OpenClaw delivery was skipped even though a source context or configured target was available
 - the video is frozen across multiple timestamps
 - subtitle bar covers the speaker's mouth
 - headline/card covers the face
