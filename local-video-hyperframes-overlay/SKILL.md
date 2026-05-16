@@ -58,7 +58,8 @@ description: Use this skill whenever the user wants to add HyperFrames, HTML, Re
    - V1 控制在 5-7 个 beat，最多 1 个轻图表/信息卡同时出现，避免廉价模板感。
 
 8. **字幕时间轴先行。**
-   - 没有 SRT 时先转写，生成 `captions.cleaned.srt`。
+   - 没有 SRT 时先按 `references/transcription.md` 下载/使用 `Systran/faster-whisper-small` 转写，先生成 `captions.raw.srt/json`，再生成 `captions.cleaned.srt/json`。
+   - 如果 `OPENAI_API_KEY` 缺失或 `openai-whisper` 出现模型 checksum 错误，默认改用 `uv run --with faster-whisper`；不能编造字幕或跳过字幕。
    - 允许修正明显错词，但不要大改时间轴。
    - 每条字幕最多两行，底部 glass bar 内可读。
 
@@ -101,6 +102,7 @@ description: Use this skill whenever the user wants to add HyperFrames, HTML, Re
 - `caption_source`: 已有 SRT 或转写生成的 SRT
 - `visual_goal`: 例如“高质量 YouTube 科技/AI 教学视频开场”
 - `expected_terms`: 必须校正的产品名、人名、专有词，例如 `Sell AI Pro`
+- `transcription_model`: 默认 `Systran/faster-whisper-small`，见 `references/transcription.md`
 
 ## SOP
 
@@ -135,12 +137,23 @@ Record:
 
 ### 2. Build or clean subtitles
 
-If no SRT exists, transcribe first. Use whichever local Whisper path is stable. Then create:
+If no SRT exists, transcribe first using `references/transcription.md`.
 
+Default model and runner:
+
+- `Systran/faster-whisper-small`
+- `uv run --with faster-whisper`
+- source audio extracted to `audio.wav`
+
+Then create:
+
+- `captions.raw.srt`
+- `captions.raw.json`
 - `captions.cleaned.srt`
 - `captions.cleaned.json`
 
 Clean only obvious terms, especially domain terms, names, numbers, product words, and CTA words.
+If the model cannot be downloaded or loaded, stop and report the blocker. Do not invent transcript text and do not continue to visual planning without a real subtitle timeline.
 
 ### 3. Plan overlay beats from SRT
 
@@ -344,6 +357,7 @@ Report in this structure:
 ## Kimi / Other Model Usage
 
 If the executor is Kimi or another model, paste this whole `SKILL.md` plus `templates/kimi-task-prompt.md`.
+Also paste `references/transcription.md` when the video has no reliable SRT, so the model knows exactly how to download and use the speech-to-text model.
 
 Tell the model:
 

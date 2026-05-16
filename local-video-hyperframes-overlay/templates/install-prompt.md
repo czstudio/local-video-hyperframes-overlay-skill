@@ -17,7 +17,9 @@ Skill name: local-video-hyperframes-overlay
 3. 以后凡是我说“给本地视频叠 HyperFrames/科技感字幕/YouTube AI 教学开场动效”，都必须先使用这个 skill。
 4. 长视频生成前，必须先给我确认 `segment-plan.md`：字幕校正文案、智能分段、顶部进度条 label、图表/信息卡点位和理由。
 5. 这个 skill 只能输出 16:9 横屏；禁止生成 9:16/竖屏版本，禁止把人物画面强裁、拉伸或放大到失真。
-6. 安装后请回复：
+6. 没有 SRT 时，必须先阅读 `references/transcription.md`，按里面的 `uv run --with faster-whisper` + `Systran/faster-whisper-small` 下载/使用语音转字幕模型，生成 `captions.raw.srt/json` 和 `captions.cleaned.srt/json` 后，才能进入分段和渲染。
+7. 如果 `OPENAI_API_KEY` 缺失或 `openai-whisper` 模型 checksum 失败，不要编字幕、不要跳过字幕，改用 faster-whisper；仍失败就报告 blocker。
+8. 安装后请回复：
    已安装 local-video-hyperframes-overlay，并说明 SKILL.md 的绝对路径。
 
 不要只阅读 GitHub 页面；必须真正复制 skill 文件到本地 skills 目录。

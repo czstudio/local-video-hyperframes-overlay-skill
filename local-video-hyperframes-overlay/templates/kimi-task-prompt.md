@@ -12,6 +12,7 @@
 - 必须校正的词：`{{EXPECTED_TERMS}}`
 - 是否需要先确认字幕/分段：`{{CONFIRM_SEGMENTS}}`
 - 顶部进度条风格：`{{PROGRESS_STYLE}}`
+- 字幕转写模型：默认 `Systran/faster-whisper-small`，按 `references/transcription.md` 下载和使用
 
 ## 绝对要求
 
@@ -26,7 +27,7 @@
 6. 前 0-8 秒优先放最抓人的信息，节奏要明显 stronger。
 7. 合理加大字、加字幕、加 callout/信息卡/少量图表，并在合适节点做人物位置切换。
 8. V1 不要塞太多效果；不要粒子雨、不要满屏卡片、不要厚重黑色 dashboard。
-9. 先识别或清洗 SRT 时间轴。
+9. 先识别或清洗 SRT 时间轴。没有 SRT 时，必须先按 `references/transcription.md` 使用 `uv run --with faster-whisper` + `Systran/faster-whisper-small` 生成 `captions.raw.srt/json`，再清洗成 `captions.cleaned.srt/json`。
 10. HTML/HyperFrames 只渲染透明 overlay，最终用 ffmpeg 和源视频合成。
 11. 输出前必须给关键帧 contact sheet，证明视频在动、人物只有一个且人物居中，并且风格接近参考图。
 12. 屏幕文字必须精简：每个 beat 默认只保留一个小 label、一个大标题、一个薄荷/青色强调词、一句补充；不要同时堆 chips/stat/callout/chart。
@@ -35,10 +36,14 @@
 15. 默认先输出 `segment-plan.md`，让用户确认字幕文案、智能分段、进度条 label、图表/信息卡点位后再渲染；除非 `{{CONFIRM_SEGMENTS}}` 明确写“否/直接生成”。
 16. 视频顶部要有语义进度条：按文案分段显示，当前段高亮，一个跑步小人沿轨道移动；不能遮脸、遮标题或遮字幕。
 17. 图表/信息卡必须少而准：每个都写清时间点、类型、内容、为什么需要；没有补充价值就不要加。
+18. 如果 `OPENAI_API_KEY` 缺失或 `openai-whisper` 模型 checksum 失败，不要反复重试，也不要伪造字幕；改用 faster-whisper 工作流，仍失败就报告 blocker。
 
 ## 交付物
 
+- `captions.raw.srt`
+- `captions.raw.json`
 - `captions.cleaned.srt`
+- `captions.cleaned.json`
 - `segment-plan.md`
 - `overlay.html` 或等价 HTML
 - `final-16x9.mp4`
